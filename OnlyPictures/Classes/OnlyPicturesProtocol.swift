@@ -287,7 +287,7 @@ extension OnlyPictures: OnlyPictureInsertRemoveProtocol{
         self.picturesCount += 1 // Increase picture count.
         
         // If visible pictures are there, add it run time.
-        if let _ = self.dataSource?.visiblePictures?() {
+        if let _ = self.dataSource?.visiblePictures?(onlyPictureView: self) {
             
             
             // If total picturesCount are more than visiblePictures
