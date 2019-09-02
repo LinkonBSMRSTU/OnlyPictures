@@ -13,10 +13,10 @@ private var IMAGEVIEW_BORDERWIDTH = 2.0
 private var SIZE_OF_IMAGEVIEWS: CGFloat = 0.0
 
 @objc public protocol OnlyPicturesDataSource {
-    func numberOfPictures() -> Int
-    @objc optional func visiblePictures() -> Int
-    @objc optional func pictureViews(index: Int) -> UIImage
-    @objc optional func pictureViews(_ imageView: UIImageView, index: Int)
+    func numberOfPictures(onlyPictureView: OnlyPictures?) -> Int
+    @objc optional func visiblePictures(onlyPictureView: OnlyPictures?) -> Int
+    @objc optional func pictureViews(onlyPictureView: OnlyPictures?, index: Int) -> UIImage
+    @objc optional func pictureViews(onlyPictureView: OnlyPictures?, _ imageView: UIImageView, index: Int)
 }
 
 @objc public protocol OnlyPicturesDelegate {
@@ -153,7 +153,7 @@ public class OnlyPictures: UIView {
         
         SIZE_OF_IMAGEVIEWS = self.bounds.size.height // Generic instance for ImageView size.
         
-        guard let picturesCount: Int = self.dataSource?.numberOfPictures(), picturesCount != 0 else{
+        guard let picturesCount: Int = self.dataSource?.numberOfPictures(onlyPictureView: self), picturesCount != 0 else{
             return
         }
         self.picturesCount = picturesCount  // assign new pictures count to pictureCount
@@ -163,7 +163,7 @@ public class OnlyPictures: UIView {
             
             var isCountRequired = false
             // Visible picture logic --------------------------
-            if let visiblePictures = self.dataSource?.visiblePictures?(), visiblePictures > 0{
+            if let visiblePictures = self.dataSource?.visiblePictures?(onlyPictureView: self), visiblePictures > 0{
                 self.visiblePictures = visiblePictures
 
                 // If pictureCount is less or equal to visiblePictures, walk up to pictureCount OR we will need a count
@@ -179,7 +179,7 @@ public class OnlyPictures: UIView {
             
             // reload in existing ImageViews --------------------------
             
-            if let visiblePictures = self.dataSource?.visiblePictures?(), visiblePictures > 0{
+            if let visiblePictures = self.dataSource?.visiblePictures?(onlyPictureView: self), visiblePictures > 0{
                 self.visiblePictures = visiblePictures
                 
                 var indexForStackviewOfImageView: Int = 0
@@ -284,14 +284,14 @@ public class OnlyPictures: UIView {
         }
         
         
-        if let image = self.dataSource?.pictureViews?(index: indexOfPicture) {
+        if let image = self.dataSource?.pictureViews?(onlyPictureView: self, index: indexOfPicture) {
             if !__CGSizeEqualToSize(image.size, .zero){
                 imageView?.image = image
             }
         }
         
         // If picture set inside 'pictureViews(_ imageView: UIImageView, index: Int)' by developer himself/herself.
-        self.dataSource?.pictureViews?(imageView!, index: indexOfPicture)
+        self.dataSource?.pictureViews?(onlyPictureView: self, imageView!, index: indexOfPicture)
     }
     
     private func removeAdditionalImageViewsInsideStackView(indexStopped: Int){
@@ -411,12 +411,12 @@ internal extension OnlyPictures {
         self.listPictureImageViews.append(pictureImageView)
         
         // If picture in UIImage format sent by 'pictureViews(index: Int) -> UIImage'
-        if let image = self.dataSource?.pictureViews?(index: index) {
+        if let image = self.dataSource?.pictureViews?(onlyPictureView: self, index: index) {
             self.setImageInImageView(image, inImageView: pictureImageView)
         }
         
         // If picture set inside 'pictureViews(_ imageView: UIImageView, index: Int)' by developer himself/herself.
-        self.dataSource?.pictureViews?(pictureImageView, index: index)
+        self.dataSource?.pictureViews?(onlyPictureView: self, pictureImageView, index: index)
     }
     
     func setImageInImageView(_ image: UIImage, inImageView pictureImageView: OnlyPictureImageView) {
@@ -825,4 +825,3 @@ extension UIView: CornerRadius {
     }
     
 }
-
